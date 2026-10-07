@@ -13,20 +13,28 @@ public class H2ConnectionFactory implements ConnectionFactory {
     public Connection createConnection() throws SQLException {
         Properties props = new Properties();
 
-        // Читаем настройки из файла
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("app.properties")) {
-            if (input != null) {
-                props.load(input);
+        // Попробуй поменять на "application.properties", если ошибка сохранится
+        String fileName = "app.properties";
+
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(fileName)) {
+            if (input == null) {
+                // Теперь тест упадет с понятной надписью, если имя файла неверное
+                throw new RuntimeException("Файл " + fileName + " не найден в папке resources! Проверь его точное название.");
             }
+            props.load(input);
         } catch (Exception e) {
-            System.out.println("Не удалось прочитать файл настроек");
+            throw new RuntimeException("Ошибка чтения файла", e);
         }
 
         String url = props.getProperty("h2.url");
         String user = props.getProperty("h2.user");
         String password = props.getProperty("h2.password");
 
+        if (url == null) {
+            // Тест подскажет, если ключи в файле называются иначе (например jdbc.url)
+            throw new RuntimeException("Ключ 'h2.url' не найден! Открой файл " + fileName + " и проверь, как точно называются ключи.");
+        }
+
         return DriverManager.getConnection(url, user, password);
     }
 }
-
