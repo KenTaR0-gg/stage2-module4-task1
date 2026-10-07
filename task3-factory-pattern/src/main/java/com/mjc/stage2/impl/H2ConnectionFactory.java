@@ -13,28 +13,21 @@ public class H2ConnectionFactory implements ConnectionFactory {
     public Connection createConnection() throws SQLException {
         Properties props = new Properties();
 
-        // Попробуй поменять на "application.properties", если ошибка сохранится
-        String fileName = "app.properties";
-
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(fileName)) {
-            if (input == null) {
-                // Теперь тест упадет с понятной надписью, если имя файла неверное
-                throw new RuntimeException("Файл " + fileName + " не найден в папке resources! Проверь его точное название.");
+        // 1. Указываем ПРАВИЛЬНОЕ имя файла
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("h2database.properties")) {
+            if (input != null) {
+                props.load(input);
             }
-            props.load(input);
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка чтения файла", e);
+            e.printStackTrace();
         }
 
-        String url = props.getProperty("h2.url");
-        String user = props.getProperty("h2.user");
-        String password = props.getProperty("h2.password");
+        // 2. Достаем настройки по ПРАВИЛЬНЫМ ключам из h2database.properties
+        String url = props.getProperty("db_url");
+        String user = props.getProperty("user");
+        String password = props.getProperty("password");
 
-        if (url == null) {
-            // Тест подскажет, если ключи в файле называются иначе (например jdbc.url)
-            throw new RuntimeException("Ключ 'h2.url' не найден! Открой файл " + fileName + " и проверь, как точно называются ключи.");
-        }
-
+        // 3. Возвращаем соединение
         return DriverManager.getConnection(url, user, password);
     }
 }
