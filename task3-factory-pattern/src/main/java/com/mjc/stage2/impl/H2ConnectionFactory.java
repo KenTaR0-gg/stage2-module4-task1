@@ -39,6 +39,7 @@ public class H2ConnectionFactory implements ConnectionFactory {
         }
 
         // 4. Возвращаем соединение
+        url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
         return DriverManager.getConnection(url, user, password);
     }
 }
