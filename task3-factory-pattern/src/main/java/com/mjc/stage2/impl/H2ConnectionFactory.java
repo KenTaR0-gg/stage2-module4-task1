@@ -13,7 +13,6 @@ public class H2ConnectionFactory implements ConnectionFactory {
     public Connection createConnection() throws SQLException {
         Properties props = new Properties();
 
-        // 1. Указываем ПРАВИЛЬНОЕ имя файла
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("h2database.properties")) {
             if (input != null) {
                 props.load(input);
@@ -22,12 +21,21 @@ public class H2ConnectionFactory implements ConnectionFactory {
             e.printStackTrace();
         }
 
-        // 2. Достаем настройки по ПРАВИЛЬНЫМ ключам из h2database.properties
+        // Извлекаем все параметры, включая драйвер
+        String driver = props.getProperty("jdbc_driver");
         String url = props.getProperty("db_url");
         String user = props.getProperty("user");
         String password = props.getProperty("password");
 
-        // 3. Возвращаем соединение
+        // Принудительно загружаем драйвер для серверного раннера MJC
+        try {
+            if (driver != null) {
+                Class.forName(driver);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
         return DriverManager.getConnection(url, user, password);
     }
 }
