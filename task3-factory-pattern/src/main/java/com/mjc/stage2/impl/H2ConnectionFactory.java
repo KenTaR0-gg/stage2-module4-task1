@@ -9,10 +9,12 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class H2ConnectionFactory implements ConnectionFactory {
+
     @Override
     public Connection createConnection() throws SQLException {
         Properties props = new Properties();
 
+        // 1. Читаем правильный файл настроек
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("h2database.properties")) {
             if (input != null) {
                 props.load(input);
@@ -21,13 +23,13 @@ public class H2ConnectionFactory implements ConnectionFactory {
             e.printStackTrace();
         }
 
-        // Извлекаем все параметры, включая драйвер
+        // 2. Достаем все настройки по правильным ключам
         String driver = props.getProperty("jdbc_driver");
         String url = props.getProperty("db_url");
         String user = props.getProperty("user");
         String password = props.getProperty("password");
 
-        // Принудительно загружаем драйвер для серверного раннера MJC
+        // 3. Принудительно подгружаем драйвер H2 (помогает избежать зависаний на сервере MJC)
         try {
             if (driver != null) {
                 Class.forName(driver);
@@ -36,6 +38,7 @@ public class H2ConnectionFactory implements ConnectionFactory {
             e.printStackTrace();
         }
 
+        // 4. Возвращаем соединение
         return DriverManager.getConnection(url, user, password);
     }
 }
