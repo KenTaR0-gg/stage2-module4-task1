@@ -1,10 +1,7 @@
 package com.mjc.stage2;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import java.util.Objects;
 
-@EqualsAndHashCode
-@ToString
 public class Employee {
     private String name;
     private String lastName;
@@ -14,6 +11,15 @@ public class Employee {
     private String carNumber;
 
     public Employee() {
+    }
+
+    public Employee(EmployeeBuilder builder) {
+        this.name = builder.name;
+        this.lastName = builder.lastName;
+        this.position = builder.position;
+        this.phone = builder.phone;
+        this.email = builder.email;
+        this.carNumber = builder.carNumber;
     }
 
     public String getName() {
@@ -68,6 +74,36 @@ public class Employee {
         return new EmployeeBuilder();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return Objects.equals(name, employee.name) &&
+                Objects.equals(lastName, employee.lastName) &&
+                Objects.equals(position, employee.position) &&
+                Objects.equals(phone, employee.phone) &&
+                Objects.equals(email, employee.email) &&
+                Objects.equals(carNumber, employee.carNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, lastName, position, phone, email, carNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", position='" + position + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", carNumber='" + carNumber + '\'' +
+                '}';
+    }
+
     public static class EmployeeBuilder {
         private String name;
         private String lastName;
@@ -78,7 +114,7 @@ public class Employee {
 
         public EmployeeBuilder setName(String name) {
             this.name = name;
-            return this; // Возвращаем текущий объект билдера
+            return this;
         }
 
         public EmployeeBuilder setLastName(String lastName) {
@@ -107,14 +143,7 @@ public class Employee {
         }
 
         public Employee build() {
-            Employee employee = new Employee();
-            employee.setName(this.name);
-            employee.setLastName(this.lastName);
-            employee.setPosition(this.position);
-            employee.setPhone(this.phone);
-            employee.setEmail(this.email);
-            employee.setCarNumber(this.carNumber);
-            return employee;
+            return new Employee(this);
         }
     }
 }
